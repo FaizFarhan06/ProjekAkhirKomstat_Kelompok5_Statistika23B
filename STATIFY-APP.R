@@ -320,7 +320,42 @@ server <- function(input, output, session) {
       )
     }
   })
+
+  output$unduh_docx <- downloadHandler(
+    filename = function() {
+      paste0("hasil_uji_", Sys.Date(), ".docx")
+    },
+    content = function(file) {
+      library(officer)
+      library(flextable)
+      
+      hasil <- hasilUji()
+      
+      doc <- read_docx() %>%
+        body_add_par("Laporan Hasil Uji Statistik", style = "heading 1") %>%
+        body_add_par(paste("Jenis Uji:", hasil$jenis), style = "Normal") %>%
+        body_add_par(paste("Variabel:", hasil$variabel), style = "Normal") %>%
+        body_add_par(paste("Statistik Uji:", ifelse(is.null(hasil$statistic), "-", hasil$statistic)), style = "Normal") %>%
+        body_add_par(paste("p-value:", round(hasil$nilai_p, 4)), style = "Normal") %>%
+        body_add_par(paste("Alpha:", hasil$alpha), style = "Normal") %>%
+        body_add_par(paste("Keputusan:", hasil$keputusan), style = "Normal")
+      
+      print(doc, target = file)
+    }
+  )
   
+  output$unduh_pdf <- downloadHandler(
+    filename = function() {
+      paste0("hasil_uji_", Sys.Date(), ".pdf")
+    },
+    content = function(file) {
+      rmarkdown::render("template_laporan.Rmd",
+                        output_file = file,
+                        params = list(hasil = hasilUji()),
+                        envir = new.env(parent = globalenv()))
+    }
+  )
+      
  output$output_uji <- renderPrint({
     df <- dataInput()
     if (input$uji == "median" && input$var_median != "") {
