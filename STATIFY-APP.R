@@ -279,3 +279,45 @@ server <- function(input, output, session) {
       ggplotly(p)
     }
   })
+  
+ hasilUji <- reactive({
+    req(dataInput(), input$uji)
+    df <- dataInput()
+    
+    if (input$uji == "median") {
+      test <- wilcox.test(df[[input$var_median]], mu = 0)
+      list(
+        jenis = "Uji Wilcoxon (Median)",
+        variabel = input$var_median,
+        nilai_p = test$p.value,
+        statistic = test$statistic,
+        alpha = input$alpha1,
+        keputusan = if (test$p.value < input$alpha1) "Tolak H0" else "Gagal Tolak H0"
+      )
+      
+    } else if (input$uji == "fisher") {
+      tab <- table(df[[input$var_kat1]], df[[input$var_kat2]])
+      test <- fisher.test(tab)
+      list(
+        jenis = "Uji Fisher",
+        variabel = paste(input$var_kat1, "vs", input$var_kat2),
+        nilai_p = test$p.value,
+        statistic = NA,
+        alpha = input$alpha2,
+        keputusan = if (test$p.value < input$alpha2) "Tolak H0" else "Gagal Tolak H0"
+      )
+      
+    } else if (input$uji == "chisq") {
+      tab <- table(df[[input$var_kat1]], df[[input$var_kat2]])
+      test <- chisq.test(tab)
+      list(
+        jenis = "Uji Chi-Square",
+        variabel = paste(input$var_kat1, "vs", input$var_kat2),
+        nilai_p = test$p.value,
+        statistic = test$statistic,
+        alpha = input$alpha2,
+        keputusan = if (test$p.value < input$alpha2) "Tolak H0" else "Gagal Tolak H0"
+      )
+    }
+  })
+  
