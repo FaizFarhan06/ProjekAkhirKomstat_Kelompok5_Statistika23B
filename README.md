@@ -15,6 +15,7 @@
 
 - `app.R` - kode utama aplikasi Shiny
 - `www/` - file media (logo, bg, audio)
+- `data/` - contoh data yang di butuhkan
 - `laporan/` - hasil uji contoh
 - `README.md` - dokumentasi proyek
 
