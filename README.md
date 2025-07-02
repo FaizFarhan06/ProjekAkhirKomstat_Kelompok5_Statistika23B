@@ -1,5 +1,4 @@
 # ProjekAkhirKomstat_Kelompok5_Statistika23B
-# ProjekAkhirKomstat_Kelompok5_Stat23B
 # STATIFY
 
 📊 STATIFY adalah aplikasi berbasis R Shiny untuk melakukan analisis statistik nonparametrik, seperti uji Median, Fisher, dan Chi-Square. Aplikasi ini menyediakan fitur visualisasi, laporan otomatis, dan ekspor hasil ke Word.
