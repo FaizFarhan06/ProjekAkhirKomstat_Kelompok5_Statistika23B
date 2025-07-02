@@ -134,3 +134,95 @@ ui <- dashboardPage(
     }, 2500); // muncul selama 2.5 detik
   "))
     ),
+
+     tabItems(
+      tabItem(tabName = "beranda",
+              h1("Selamat Datang di STATIFY 📊"),
+              p("Aplikasi interaktif untuk uji statistik nonparametrik: Median, Fisher, dan Chi-Square."),
+              br(),
+              fluidRow(
+                box(title = "Apa itu STATIFY?", status = "primary", solidHeader = TRUE, width = 6,
+                    p("STATIFY adalah dashboard interaktif berbasis R Shiny yang dikembangkan untuk kebutuhan analisis statistik nonparametrik. Anda dapat mengunggah data, memilih jenis uji, memvisualisasikan hasil, dan mendapatkan keputusan statistik secara otomatis."),
+                    p("Cocok untuk mahasiswa, peneliti, dan praktisi.")
+                ),
+                box(title = "Panduan Penggunaan", status = "success", solidHeader = TRUE, width = 6,
+                    tags$ul(
+                      tags$li("📁 Unggah data CSV"),
+                      tags$li("🧪 Pilih jenis uji yang diinginkan"),
+                      tags$li("📊 Tampilkan visualisasi data"),
+                      tags$li("✅ Lihat hasil dan keputusan uji")
+                    )
+                )
+              )
+      ),
+      tabItem(tabName = "info",
+              h2("Penjelasan Uji Statistik"),
+              h3("1. Uji Median (Wilcoxon Signed-Rank)"),
+              p("Uji ini digunakan untuk mengetahui apakah nilai tengah (median) dari data berbeda dari nilai tertentu."),
+              tags$ul(
+                tags$li("Hipotesis nol (H₀): median = nilai tertentu"),
+                tags$li("Cocok untuk data numerik satu variabel")
+              ),
+              h5("Contoh Data:"),
+              verbatimTextOutput("contoh_median"),
+              
+              h3("2. Uji Fisher (Fisher’s Exact Test)"),
+              p("Uji ini digunakan untuk melihat hubungan antara dua variabel kategorik pada tabel kontingensi kecil."),
+              tags$ul(
+                tags$li("Hipotesis nol (H₀): tidak ada hubungan antara kategori"),
+                tags$li("Cocok untuk tabel kecil, sel dengan frekuensi < 5")
+              ),
+              h5("Contoh Data:"),
+              verbatimTextOutput("contoh_fisher"),
+              
+              h3("3. Uji Chi-Square"),
+              p("Uji ini digunakan untuk melihat hubungan antara dua variabel kategorik pada data besar."),
+              tags$ul(
+                tags$li("Hipotesis nol (H₀): tidak ada hubungan"),
+                tags$li("Frekuensi sel sebaiknya ≥ 5")
+              ),
+              h5("Contoh Data:"),
+              verbatimTextOutput("contoh_chisq")
+      ),
+      
+      tabItem(tabName = "upload",
+              fluidRow(
+                box(title = "Unggah Data CSV", width = 6, status = "primary", solidHeader = TRUE,
+                    fileInput("datafile", "Pilih File (.csv)", accept = ".csv"),
+                    radioButtons("uji", "Pilih Jenis Uji:",
+                                 choices = c("Uji Median" = "median", 
+                                             "Uji Fisher" = "fisher",
+                                             "Uji Chi-Square" = "chisq")),
+                    conditionalPanel(
+                      condition = "input.uji == 'median'",
+                      selectInput("var_median", "Pilih Variabel Numerik:", choices = NULL),
+                      numericInput("alpha1", "Signifikansi α", value = 0.05)
+                    ),
+                    conditionalPanel(
+                      condition = "input.uji == 'fisher' || input.uji == 'chisq'",
+                      selectInput("var_kat1", "Variabel Kategori 1:", choices = NULL),
+                      selectInput("var_kat2", "Variabel Kategori 2:", choices = NULL),
+                      numericInput("alpha2", "Signifikansi α", value = 0.05)
+                    )
+                ),
+                box(title = "Preview Data", width = 6, DTOutput("tabel_data"))
+              )
+      ),
+      tabItem(tabName = "visual",
+              h3("Visualisasi Data"),
+              withSpinner(plotlyOutput("plot"))
+      ),
+      tabItem(tabName = "hasil",
+              h3("Hasil Uji Statistik"),
+              verbatimTextOutput("output_uji"),
+              br(),
+              h4("Keputusan:"),
+              textOutput("keputusan"),
+              br(),
+              h4("Unduh Laporan:"),
+              downloadButton("unduh_docx", "📄 Word"),
+              #downloadButton("unduh_pdf", "📄 PDF")
+      )
+    )
+  )
+)
