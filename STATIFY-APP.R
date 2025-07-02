@@ -321,3 +321,44 @@ server <- function(input, output, session) {
     }
   })
   
+ output$output_uji <- renderPrint({
+    df <- dataInput()
+    if (input$uji == "median" && input$var_median != "") {
+      wilcox.test(df[[input$var_median]], mu = 0)
+    } else if (input$uji == "fisher" && input$var_kat1 != "" && input$var_kat2 != "") {
+      tab <- table(df[[input$var_kat1]], df[[input$var_kat2]])
+      fisher.test(tab)
+    } else if (input$uji == "chisq" && input$var_kat1 != "" && input$var_kat2 != "") {
+      tab <- table(df[[input$var_kat1]], df[[input$var_kat2]])
+      chisq.test(tab)
+    }
+  })
+  
+  output$keputusan <- renderText({
+    df <- dataInput()
+    if (input$uji == "median" && input$var_median != "") {
+      hasil <- wilcox.test(df[[input$var_median]], mu = 0)
+      if (hasil$p.value < input$alpha1) {
+        paste("Tolak H₀. p-value =", round(hasil$p.value, 4))
+      } else {
+        paste("Gagal tolak H₀. p-value =", round(hasil$p.value, 4))
+      }
+    } else if (input$uji == "fisher" && input$var_kat1 != "" && input$var_kat2 != "") {
+      tab <- table(df[[input$var_kat1]], df[[input$var_kat2]])
+      hasil <- fisher.test(tab)
+      if (hasil$p.value < input$alpha2) {
+        paste("Tolak H₀. p-value =", round(hasil$p.value, 4))
+      } else {
+        paste("Gagal tolak H₀. p-value =", round(hasil$p.value, 4))
+      }
+    } else if (input$uji == "chisq" && input$var_kat1 != "" && input$var_kat2 != "") {
+      tab <- table(df[[input$var_kat1]], df[[input$var_kat2]])
+      hasil <- chisq.test(tab)
+      if (hasil$p.value < input$alpha2) {
+        paste("Tolak H₀. p-value =", round(hasil$p.value, 4))
+      } else {
+        paste("Gagal tolak H₀. p-value =", round(hasil$p.value, 4))
+      }
+    }
+  })
+}
