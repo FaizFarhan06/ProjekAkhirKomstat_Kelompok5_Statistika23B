@@ -226,3 +226,56 @@ ui <- dashboardPage(
     )
   )
 )
+
+server <- function(input, output, session) {
+  
+  # Contoh untuk halaman informasi
+  output$contoh_median <- renderPrint({
+    data.frame(Nilai = c(83, 65, 97, 73, 80))
+  })
+  
+  output$contoh_fisher <- renderPrint({
+    data.frame(Obat = c("A", "A", "B", "B"),
+               Status = c("Ya", "Tidak", "Ya", "Tidak"))
+  })
+  
+  output$contoh_chisq <- renderPrint({
+    data.frame(Pekerjaan = c("Guru", "Guru", "Dokter", "Insinyur"),
+               Kopi = c("Hitam", "Latte", "Cappuccino", "Hitam"))
+  })
+  
+  # Data upload dan dinamis input
+  dataInput <- reactive({
+    req(input$datafile)
+    read.csv(input$datafile$datapath)
+  })
+  
+  observe({
+    df <- dataInput()
+    updateSelectInput(session, "var_median", choices = names(df))
+    updateSelectInput(session, "var_kat1", choices = names(df))
+    updateSelectInput(session, "var_kat2", choices = names(df))
+  })
+  
+  output$tabel_data <- renderDT({
+    req(dataInput())
+    datatable(dataInput(), options = list(pageLength = 5))
+  })
+  
+  output$plot <- renderPlotly({
+    df <- dataInput()
+    if (input$uji == "median" && input$var_median != "") {
+      p <- ggplot(df, aes_string(y = input$var_median)) +
+        geom_boxplot(fill = "lightblue") +
+        labs(title = "Boxplot Uji Median", y = input$var_median)
+      ggplotly(p)
+    } else if (input$uji %in% c("fisher", "chisq") && input$var_kat1 != "" && input$var_kat2 != "") {
+      tab <- table(df[[input$var_kat1]], df[[input$var_kat2]])
+      df_tab <- as.data.frame(tab)
+      names(df_tab) <- c("X", "Y", "Freq")
+      p <- ggplot(df_tab, aes(x = X, y = Freq, fill = Y)) +
+        geom_bar(stat = "identity", position = "dodge") +
+        labs(title = "Barplot Tabel Kontingensi", y = "Frekuensi")
+      ggplotly(p)
+    }
+  })
